@@ -8,6 +8,7 @@ class User(db.Model):
     name = db.Column(db.String(32), nullable=False)
     username = db.Column(db.String(16), unique=True, nullable=False)
     email = db.Column(db.String(64), unique=True, nullable=False)
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)
     password = db.Column(db.String(256), nullable=False)
     
 class Product(db.Model):
@@ -36,3 +37,7 @@ class Order(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
     date_ordered = db.Column(db.DateTime, nullable=False)
+
+#create database if it doesn't exist
+# with app.app_context():
+#     db.create_all()
