@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from models import db, User, Product, Category, Cart, Order
-from forms import LoginForm, RegistrationForm
-from app import app
+from flask import render_template, redirect, url_for, flash
+from grocerystore.models import User, Product, Category, Cart, Order
+from grocerystore.forms import LoginForm, RegistrationForm
+from grocerystore import app, db
 
 @app.route('/')
+@app.route('/home')
 def home():
     return render_template('home.html')
 

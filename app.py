@@ -1,6 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
+from grocerystore import app
 
-app = Flask(__name__)
-
-import config, models, routes
+if __name__ == "__main__":
+    app.run()
