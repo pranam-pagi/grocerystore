@@ -1,7 +1,25 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-  <h1 style="
+  <div style="
     display:flex; justify-content: center; align-items: center;
-  ">Messi</h1>    
+  ">
+  {% for user in users %}
+  <!-- Show the username of users one below the other -->
+    <div>
+      <h1 style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid black;
+        border-radius: 10px;
+      ">
+      @{{ user.username }}
+    </h1>
+    </div>
+    
+  {% endfor %}
+  </div>
 {% endblock content %}
