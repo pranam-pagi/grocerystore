@@ -1,25 +1,26 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-  <div style="
-    display:flex; justify-content: center; align-items: center;
-  ">
-  {% for user in users %}
-  <!-- Show the username of users one below the other -->
-    <div>
-      <h1 style="
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 10px;
-        padding: 10px;
-        border: 1px solid black;
-        border-radius: 10px;
-      ">
-      @{{ user.username }}
-    </h1>
-    </div>
-    
+  {% for product in products %}
+    <article class="media content-section">
+      <div class="media-body">
+        <div class="article-metadata">
+          <a class="mr-2" href="#">{{ product.name }}</a>
+          <small class="text-muted">{{ product.manufacture_date.strftime('%d-%m-%Y') }}</small>
+        </div>
+        <p class="article-content">
+          Price: &#8377;{{ product.price }}
+        </p>
+        <p class="article-content">
+          Category ID: {{ product.category_id }}
+        </p>
+        <p class="article-content">
+          Quantity: {{ product.quantity }}
+        </p>
+        <p class="article-content">
+          Man. Date: {{ product.manufacture_date }}
+        </p>
+      </div>
+    </article>
   {% endfor %}
-  </div>
 {% endblock content %}

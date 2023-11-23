@@ -1,15 +1,15 @@
 from flask import render_template, redirect, url_for, flash, request
 from grocerystore.models import User, Product, Category, Cart, Order
-from grocerystore.forms import LoginForm, RegistrationForm, UpdateAccountForm
+from grocerystore.forms import LoginForm, RegistrationForm, UpdateAccountForm, ProductForm
 from grocerystore import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
 
 @app.route('/')
 @app.route('/home')
 def home():
-    # Get all users
-    users = User.query.all()
-    return render_template('home.html', users=users)
+    # Get all products
+    products = Product.query.all()
+    return render_template('home.html', products=products)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -74,3 +74,15 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
     return render_template('account.html', title='Account', form=form)
+
+@app.route('/product/new', methods=['GET', 'POST'])
+@login_required
+def new_product():
+    form = ProductForm()
+    if form.validate_on_submit():
+        product = Product(name=form.name.data, price=form.price.data, category_id=form.category_id.data, quantity=form.quantity.data, manufacture_date=form.manufacture_date.data)
+        db.session.add(product)
+        db.session.commit()
+        flash('Product added!', 'success')
+        return redirect(url_for('home'))
+    return render_template('create_product.html', title='New Product', form=form)

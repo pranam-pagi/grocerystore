@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, FloatField, IntegerField, DateField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from grocerystore.models import User
 
@@ -54,3 +54,12 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('Email already exists. Please choose a different one.')
+            
+# Product Form
+class ProductForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(min=4, max=32)])
+    price = FloatField('Price', validators=[DataRequired()])
+    category_id = StringField('Category ID', validators=[DataRequired()])
+    quantity = IntegerField('Quantity', validators=[DataRequired()])
+    manufacture_date = DateField('Manufacture Date', validators=[DataRequired()])
+    submit = SubmitField('Add Product')
