@@ -3,9 +3,20 @@ from grocerystore.models import User, Product, Category, Cart, Order
 from grocerystore.forms import LoginForm, RegistrationForm, UpdateAccountForm, ProductForm
 from grocerystore import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
+from functools import wraps
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_admin:
+            flash('You are not authorized to view this page.', 'danger')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/')
 @app.route('/home')
+@login_required
 def home():
     # Get all products
     products = Product.query.all()
@@ -43,6 +54,8 @@ def login():
             login_user(user, remember=form.remember.data)
             # Redirect to next page if it exists
             next_page = request.args.get('next')
+            # Flash message
+            flash('Login Successful!', 'success')
             # If next page doesn't exist, redirect to home page
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
@@ -52,7 +65,7 @@ def login():
 @app.route("/logout")
 def logout():
     logout_user()
-    return redirect(url_for('home'))
+    return redirect(url_for('login'))
 
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
@@ -75,8 +88,9 @@ def account():
         form.email.data = current_user.email
     return render_template('account.html', title='Account', form=form)
 
-@app.route('/product/new', methods=['GET', 'POST'])
+@app.route('/product_new', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def new_product():
     form = ProductForm()
     if form.validate_on_submit():

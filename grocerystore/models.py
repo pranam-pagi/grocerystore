@@ -1,5 +1,6 @@
 from grocerystore import app, db, login_manager
 from flask_login import UserMixin
+from grocerystore import bcrypt
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -43,3 +44,11 @@ class Order(db.Model):
 #create database if it doesn't exist
 with app.app_context():
     db.create_all()
+
+    #create admin user if it doesn't exist
+    admin = User.query.filter_by(username='admin').first()
+    if not admin:
+        hashed_password = bcrypt.generate_password_hash('admin').decode('utf-8')
+        admin = User(name='Admin', username='admin', email='admin@demo.in', password=hashed_password, is_admin=True)
+        db.session.add(admin)
+        db.session.commit()
