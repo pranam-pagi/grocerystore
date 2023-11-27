@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <article class="media content-section">
+    <div class="media-body">
+      <div class="article-metadata">
+        <h3>
+          {{ product.name }}
+          <!-- Create a button to update the product and align it to the right -->
+          {% if current_user.is_admin %}
+            <a href="{{ url_for('update_product', product_id=product.id) }}" class="btn btn-primary" style="float: right;">Edit</a>
+          {% endif %}
+        </h3>
+        
+      </div>
+      
+      <p class="article-content">
+        <strong>Price</strong>: &#8377;{{ product.price }}
+      </p>
+      <p class="article-content">
+        <strong>Category</strong>: <a href="{{ url_for('view_category', category_id=product.category.id) }}">{{ product.category.name }}</a>
+      </p>
+      <p class="article-content">
+        <strong>Quantity</strong>: {{ product.quantity }}
+      </p>
+      <p class="article-content">
+        <strong>Man. Date</strong>: {{ product.manufacture_date.strftime('%d/%m/%Y') }}
+      </p>
+      
+    </div>
+  </article>
+{% endblock content %}

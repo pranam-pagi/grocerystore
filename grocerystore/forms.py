@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, FloatField, IntegerField, DateField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, FloatField, IntegerField, DateField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from grocerystore.models import User
+from grocerystore.models import User, Category, Product
+from grocerystore import app
 
 # Registration Form
 class RegistrationForm(FlaskForm):
@@ -54,12 +55,25 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('Email already exists. Please choose a different one.')
-            
+
+# Category Form
+class CategoryForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(min=4, max=32)])
+    submit = SubmitField('Add Category')
+
+# Update Category Form
+class UpdateCategoryForm(CategoryForm):
+    submit = SubmitField('Update Category')
+
 # Product Form
 class ProductForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(min=4, max=32)])
     price = FloatField('Price', validators=[DataRequired()])
-    category_id = StringField('Category ID', validators=[DataRequired()])
+    category_id = SelectField('Category', validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     manufacture_date = DateField('Manufacture Date', validators=[DataRequired()])
     submit = SubmitField('Add Product')
+
+# Update Product Form
+class UpdateProductForm(ProductForm):
+    submit = SubmitField('Update Product')

@@ -5,20 +5,15 @@
     <article class="media content-section">
       <div class="media-body">
         <div class="article-metadata">
-          <a class="mr-2" href="#">{{ product.name }}</a>
-          <small class="text-muted">{{ product.manufacture_date.strftime('%d-%m-%Y') }}</small>
+          <h4>
+            <a class="mr-2" href="{{ url_for('view_product', product_id=product.id) }}">{{ product.name }}</a>            
+          </h4>
         </div>
         <p class="article-content">
-          Price: &#8377;{{ product.price }}
+          <strong>Price</strong>: &#8377;{{ product.price }}
         </p>
         <p class="article-content">
-          Category ID: {{ product.category_id }}
-        </p>
-        <p class="article-content">
-          Quantity: {{ product.quantity }}
-        </p>
-        <p class="article-content">
-          Man. Date: {{ product.manufacture_date }}
+          <strong>Category</strong>:  <a href="{{ url_for('view_category', category_id=product.category.id) }}">{{ product.category.name }}</a>
         </p>
       </div>
     </article>

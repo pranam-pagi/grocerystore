@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+
+{% block style %}
+  <style>
+    th, td {
+      vertical-align: middle !important;
+      text-align: center !important;
+    }
+    /* add m-1 bootstrap class to all a tags */
+    a {
+      margin: 0.1rem !important;
+    }
+  </style>
+{% endblock style %}
+
+{% block content %}
+    <h1>Admin Dashboard</h1>
+    <p class="lead">Welcome to the admin dashboard, {{ current_user.name }}!</p>
+    <hr>
+
+    <div>
+      <h3>Users</h3>
+      <table class="table table-striped">
+          <thead>
+              <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Username</th>
+                  <th>Email</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for user in users %}
+                  <tr>
+                      <td>{{ user.id }}</td>
+                      <td>{{ user.name }}</td>
+                      <td>@{{ user.username }}</td>
+                      <td>{{ user.email }}</td>
+                  </tr>
+              {% else %}
+                  <tr>
+                      <td colspan="4">No users found.</td>
+                  </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h3>Categories</h3>
+      <p>
+          <a href="{{ url_for('new_category') }}" class="btn btn-primary">Add New Category</a>
+      </p>
+
+      <table class="table table-striped">
+          <thead>
+              <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Number of Products</th>
+                  <th>Actions</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for category in categories %}
+                  <tr>
+                    <td>{{ category.id }}</td>
+                    <td>
+                      <a href="{{ url_for('view_category', category_id=category.id) }}">{{ category.name }}</a>
+                      </td>
+                    <td>{{ category.products | length }}</td>
+                    <td>
+                      <a class="btn btn-primary" href="{{ url_for('update_category', category_id=category.id) }}">Edit</a>
+                      <a class="btn btn-danger" href="{{ url_for('delete_category', category_id=category.id) }}">Delete</a>
+                      </td>
+                  </tr>
+              {% else %}
+                  <tr>
+                    <td colspan="7">No categories found.</td>
+                  </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h3>Products</h3>
+      <p>
+          <a href="{{ url_for('new_product') }}" class="btn btn-primary">Add New Product</a>
+      </p>
+  
+      <table class="table table-striped">
+          <thead>
+              <tr>
+                  <th>ID</th>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Manufacture Date</th>
+                  <th>Actions</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for product in products %}
+                  <tr>
+                      <td>{{ product.id }}</td>
+                    <td>
+                        <a href="{{ url_for('view_product', product_id=product.id) }}">{{ product.name }}</a>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('view_category', category_id=product.category.id) }}">{{ product.category.name }}</a>
+                    </td>
+                    <td>&#8377;{{ product.price }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ product.manufacture_date.strftime('%d/%m/%Y') }}</td>
+                    <td>
+                      <a class="btn btn-primary" href="{{ url_for('update_product', product_id=product.id) }}">Edit</a>
+                      <a class="btn btn-danger" href="{{ url_for('delete_product', product_id=product.id) }}">Delete</a>
+                    </td>
+                  </tr>
+              {% else %}
+                  <tr>
+                      <td colspan="7">No products found.</td>
+                  </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+    </div>
+{% endblock content %}

@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <article class="media content-section">
+    <div class="media-body">
+      <div class="article-metadata">
+        <h3>
+          {{ category.name }}
+          <!-- Create a button to update the category and align it to the right -->
+          {% if current_user.is_admin %}
+            <a href="{{ url_for('add_product_to_category', category_id=category.id) }}" class="btn btn-success ml-2" style="float: right;">Add Product</a>
+            <a href="{{ url_for('update_category', category_id=category.id) }}" class="btn btn-primary" style="float: right;">Edit</a>            
+          {% endif %}
+        </h3>
+      </div>
+      
+      {% if category.products %}
+        {% for product in category.products %}
+        <li class="article-conten m-4">
+          <strong>
+            <a class="mr-2" href="{{ url_for('view_product', product_id=product.id) }}">{{ product.name }}</a>
+          </strong> - {{ product.quantity }} items
+        </li>
+      {% endfor %}
+      {% else %}
+        <h5 class="article-content m-4">No products in this category.</h5>
+      {% endif %}      
+    </div>
+  </article>
+{% endblock content %}
