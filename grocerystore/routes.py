@@ -21,9 +21,24 @@ def admin_required(f):
 @app.route('/home')
 @login_required
 def home():
-    # Get all products in descending order of manufacture date
-    products = Product.query.order_by(Product.manufacture_date.desc()).all()
-    return render_template('home.html', products=products, title='Home')
+    user = User.query.get_or_404(current_user.id)
+    parameter = request.args.get('parameter')
+    query = request.args.get('query')
+    parameters = {
+        'category': 'Category',
+        'product': 'Product',
+        'price': 'Price'
+    }
+    
+    if parameter == 'category':
+        categories = Category.query.filter(Category.name.like(f'%{query}%')).all()
+        return render_template('home.html', user=user, categories=categories, query=query, title='Home', parameters=parameters, parameter=parameter)
+    elif parameter == 'product':
+        return render_template('home.html', user=user, categories=Category.query.all(), name=query, query=query, title='Home', parameters=parameters, parameter=parameter)
+    elif parameter == 'price':
+        return render_template('home.html', user=user, categories=Category.query.all(), price=float(query), query=query, title='Home', parameters=parameters, parameter=parameter)
+    
+    return render_template('home.html', user=user, categories=Category.query.all(), title='Home', parameters=parameters)
 
 
 # Route for admin dashboard
@@ -141,6 +156,10 @@ def delete_account():
     # Check if user is admin
     if user.is_admin:
         flash('Admin account cannot be deleted!', 'danger')
+        return redirect(url_for('account'))
+    # Check if password is correct
+    if not bcrypt.check_password_hash(user.password, confirm_password):
+        flash('Password incorrect!', 'danger')
         return redirect(url_for('account'))
     # Delete user
     db.session.delete(user)
@@ -319,3 +338,116 @@ def delete_product(product_id):
     db.session.commit()
     flash('Product deleted!', 'success')
     return redirect(url_for('admin'))
+
+# Route for adding a product to cart
+@app.route('/product/<int:product_id>/add_to_cart', methods=['POST'])
+@login_required
+def add_to_cart(product_id):
+    quantity = request.form.get('quantity')
+    if not quantity or quantity == '':
+        flash('Please enter a quantity!', 'danger')
+        return redirect(url_for('home'))
+    if not quantity.isdigit():
+        flash('Please enter a valid quantity!', 'danger')
+        return redirect(url_for('home'))
+    quantity = int(quantity)
+    product = Product.query.get_or_404(product_id)
+    if quantity > product.quantity:
+        flash('Not enough stock!', 'danger')
+        return redirect(url_for('home'))
+    # Get product by id
+    cart = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    # If product is already in cart, increase quantity
+    if cart:
+        if cart.quantity + quantity > product.quantity:
+            flash('Not enough stock!', 'danger')
+            return redirect(url_for('home'))
+        cart.quantity += quantity
+        db.session.commit()
+        flash('Product added to cart!', 'success')
+        return redirect(url_for('home'))
+    cart = Cart(user_id=current_user.id, product_id=product_id, quantity=quantity)
+    db.session.add(cart)
+    db.session.commit()
+    flash('Product added to cart!', 'success')
+    return redirect(url_for('home'))
+
+# Route for viewing cart
+@app.route('/cart')
+@login_required
+def view_cart():
+    # Get all cart items
+    cart = Cart.query.filter_by(user_id=current_user.id).all()
+    total = sum([item.product.price * item.quantity for item in cart])
+    return render_template('cart.html', title='Cart', cart=cart, total=total)
+
+# Update quantity of product in cart
+@app.route('/cart/<int:product_id>/update', methods=['POST'])
+@login_required
+def update_cart(product_id):
+    quantity = request.form.get('quantity')
+    if not quantity or quantity == '':
+        flash('Please enter a quantity!', 'danger')
+        return redirect(url_for('home'))
+    if not quantity.isdigit():
+        flash('Please enter a valid quantity!', 'danger')
+        return redirect(url_for('home'))
+    quantity = int(quantity)
+    product = Product.query.get_or_404(product_id)
+    if quantity > product.quantity:
+        flash('Not enough stock!', 'danger')
+        return redirect(url_for('home'))
+    cart = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    cart.quantity = quantity
+    db.session.commit()
+    flash('Cart updated!', 'success')
+    return redirect(url_for('view_cart'))
+
+# Route for deleting a product from cart
+@app.route('/cart/<int:product_id>/delete', methods=['POST'])
+@login_required
+def remove_from_cart(product_id):
+    # Get product by id
+    cart = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    db.session.delete(cart)
+    db.session.commit()
+    flash('Product deleted from cart!', 'success')
+    return redirect(url_for('view_cart'))
+
+# Route for placing order
+@app.route('/cart/order', methods=['GET', 'POST'])
+@login_required
+def place_order():
+    # Get all cart items
+    cart = Cart.query.filter_by(user_id=current_user.id).all()
+    # If cart is empty, return error
+    if not cart:
+        flash('Cart is empty!', 'danger')
+        return redirect(url_for('view_cart'))
+    # If cart is not empty, place order
+    for item in cart:
+        # If quantity in cart is more than quantity in stock, return error
+        if item.quantity > item.product.quantity:
+            flash('Not enough stock!', 'danger')
+            return redirect(url_for('view_cart'))
+        # If quantity in cart is less than quantity in stock, update quantity in stock
+        item.product.quantity -= item.quantity
+        # Add order to database
+        order = Order(user_id=current_user.id, product_id=item.product_id, quantity=item.quantity, price=item.product.price)
+        db.session.add(order)
+        db.session.commit()
+    # Delete all items from cart
+    for item in cart:
+        db.session.delete(item)
+        db.session.commit()
+    flash('Order placed!', 'success')
+    return redirect(url_for('orders'))
+
+# Route for viewing orders
+@app.route('/orders')
+@login_required
+def orders():
+    # Get all orders
+    orders = Order.query.filter_by(user_id=current_user.id).all()
+    grand_total = sum([order.price * order.quantity for order in orders])
+    return render_template('orders.html', title='Orders', orders=orders, grand_total=grand_total)

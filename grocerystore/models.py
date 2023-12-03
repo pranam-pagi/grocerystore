@@ -1,6 +1,7 @@
 from grocerystore import app, db, login_manager
 from flask_login import UserMixin
 from grocerystore import bcrypt
+from datetime import datetime
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -21,6 +22,8 @@ class Product(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     manufacture_date = db.Column(db.Date, nullable=False)
+    cart = db.relationship('Cart', backref='product', lazy=True)
+    order = db.relationship('Order', backref='product', lazy=True)
     
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -31,7 +34,7 @@ class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False) 
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,7 +42,7 @@ class Order(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
-    date_ordered = db.Column(db.DateTime, nullable=False)
+    datetime_ordered = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 #create database if it doesn't exist
 with app.app_context():

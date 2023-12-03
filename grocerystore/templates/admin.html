@@ -10,17 +10,27 @@
     a {
       margin: 0.1rem !important;
     }
+    .media-body {
+      margin-bottom: 0;;
+    }
   </style>
 {% endblock style %}
 
 {% block content %}
+  <div class="mb-5">
     <h1>Admin Dashboard</h1>
-    <p class="lead">Welcome to the admin dashboard, {{ current_user.name }}!</p>
     <hr>
+    <p class="lead">Welcome to the admin dashboard, {{ current_user.name }}!</p>
+  </div>
+        
 
-    <div>
-      <h3>Users</h3>
-      <table class="table table-striped">
+  <div class="content-section mb-5">
+    <div class="media">
+      <div class="media-body">
+        <h2>Users</h2>
+      </div>
+    </div>
+      <table class="table table-striped" style="margin-bottom: 0%;">
           <thead>
               <tr>
                   <th>ID</th>
@@ -44,50 +54,63 @@
               {% endfor %}
           </tbody>
       </table>
+  </div>
+
+  <div class="content-section mb-5">
+    <div class="media">
+      <div class="media-body">
+        <h2>
+          Categories
+          <p style="float: right;">
+            <a href="{{ url_for('new_category') }}" class="btn btn-success">Add Category</a>
+          </p>
+        </h2>
+      </div>
     </div>
 
-    <div>
-      <h3>Categories</h3>
-      <p>
-          <a href="{{ url_for('new_category') }}" class="btn btn-primary">Add New Category</a>
-      </p>
+    <table class="table table-striped" style="margin-bottom: 0%;">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Number of Products</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for category in categories %}
+          <tr>
+            <td>{{ category.id }}</td>
+            <td>
+              <a href="{{ url_for('view_category', category_id=category.id) }}">{{ category.name }}</a>
+              </td>
+            <td>{{ category.products | length }}</td>
+            <td>
+              <a class="btn btn-primary" href="{{ url_for('update_category', category_id=category.id) }}">Edit</a>
+              <a class="btn btn-danger" href="{{ url_for('delete_category', category_id=category.id) }}">Delete</a>
+              </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7">No categories found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-      <table class="table table-striped">
-          <thead>
-              <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Number of Products</th>
-                  <th>Actions</th>
-              </tr>
-          </thead>
-          <tbody>
-              {% for category in categories %}
-                  <tr>
-                    <td>{{ category.id }}</td>
-                    <td>
-                      <a href="{{ url_for('view_category', category_id=category.id) }}">{{ category.name }}</a>
-                      </td>
-                    <td>{{ category.products | length }}</td>
-                    <td>
-                      <a class="btn btn-primary" href="{{ url_for('update_category', category_id=category.id) }}">Edit</a>
-                      <a class="btn btn-danger" href="{{ url_for('delete_category', category_id=category.id) }}">Delete</a>
-                      </td>
-                  </tr>
-              {% else %}
-                  <tr>
-                    <td colspan="7">No categories found.</td>
-                  </tr>
-              {% endfor %}
-          </tbody>
-      </table>
-    </div>
-
-    <div>
-      <h3>Products</h3>
-      <p>
-          <a href="{{ url_for('new_product') }}" class="btn btn-primary">Add New Product</a>
-      </p>
+    <div class="content-section">
+      <div class="media">
+        <div class="media-body">
+          <h2>
+            Products
+            <p style="float: right;">
+              <a href="{{ url_for('new_product') }}" class="btn btn-success">Add Product</a>
+            </p>
+          </h2>
+          
+        </div>
+      </div>
   
       <table class="table table-striped">
           <thead>
