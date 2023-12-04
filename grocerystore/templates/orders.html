@@ -1,18 +1,55 @@
 {% extends "layout.html" %}
 
+{% block style %}
+  <style>
+    .right {
+      float: right;
+    }
+  </style>
+{% endblock style %}
+
 {% block content %}
-  <h1>Orders</h1>
+  <h1>
+    My Orders
+    <button type="button" class="btn btn-primary right" onclick="window.print();">
+      <i class="fa fa-print"></i>
+      Print
+    </button>
+  </h1>
   <hr>
-  {% if orders %}
-    {% for order in orders %}
+  {% if transactions %}
+    {% for transaction in transactions %}
       <p>
-        <strong>Order Name</strong>: {{ order.product.name }}<br>
-        <strong>Order Quantity</strong>: {{ order.quantity }}<br>
-        <strong>Order Total</strong>: &#8377;{{ order.price }}<br>
-        <strong>Order Date</strong>: {{ order.datetime_ordered }}<br>
+        <strong>Transaction ID</strong>: {{ transaction.id }}<br>
+        <strong>Transaction DateTime</strong>: {{ transaction.datetime }}<br>
       </p>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in transaction.orders %}
+            <tr>
+              <td>
+                <a href="{{ url_for('view_product', product_id=item.product_id) }}">{{ item.product.name }}</a>
+              </td>
+              <td>{{ item.quantity }}</td>
+              <td>&#8377;{{ item.product.price }}</td>
+              <td>&#8377;{{ item.product.price * item.quantity }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <hr>
+      <h3>
+        Total: &#8377;{{ total[transactions.index(transaction)] }}
+      </h3>
     {% endfor %}
-    <h3>Grand Total: &#8377;{{ grand_total }}</h3>
   {% else %}
     <h3>You have not placed any orders yet</h3>
   {% endif %}

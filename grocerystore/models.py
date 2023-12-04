@@ -23,8 +23,8 @@ class Product(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     manufacture_date = db.Column(db.Date, nullable=False)
     cart = db.relationship('Cart', backref='product', lazy=True)
-    order = db.relationship('Order', backref='product', lazy=True)
-    
+    orders = db.relationship('Order', backref='product', lazy=True)
+
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
@@ -36,13 +36,18 @@ class Cart(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False) 
 
-class Order(db.Model):
+class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    orders = db.relationship('Order', backref='transaction', lazy=True)
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
-    datetime_ordered = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 #create database if it doesn't exist
 with app.app_context():

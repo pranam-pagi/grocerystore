@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request
-from grocerystore.models import User, Product, Category, Cart, Order
+from grocerystore.models import User, Product, Category, Cart, Order, Transaction
 from grocerystore.forms import LoginForm, RegistrationForm, UpdateAccountForm, ProductForm, UpdateProductForm, CategoryForm, UpdateCategoryForm
 from grocerystore import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
@@ -420,6 +420,7 @@ def remove_from_cart(product_id):
 def place_order():
     # Get all cart items
     cart = Cart.query.filter_by(user_id=current_user.id).all()
+    transaction = Transaction(user_id=current_user.id)
     # If cart is empty, return error
     if not cart:
         flash('Cart is empty!', 'danger')
@@ -433,7 +434,7 @@ def place_order():
         # If quantity in cart is less than quantity in stock, update quantity in stock
         item.product.quantity -= item.quantity
         # Add order to database
-        order = Order(user_id=current_user.id, product_id=item.product_id, quantity=item.quantity, price=item.product.price)
+        order = Order(transaction=transaction, product_id=item.product_id, quantity=item.quantity, price=item.product.price)
         db.session.add(order)
         db.session.commit()
     # Delete all items from cart
@@ -447,7 +448,7 @@ def place_order():
 @app.route('/orders')
 @login_required
 def orders():
-    # Get all orders
-    orders = Order.query.filter_by(user_id=current_user.id).all()
-    grand_total = sum([order.price * order.quantity for order in orders])
-    return render_template('orders.html', title='Orders', orders=orders, grand_total=grand_total)
+    user = User.query.get_or_404(current_user.id)
+    transactions = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.datetime.desc()).all()
+    total = [sum([order.price * order.quantity for order in transaction.orders]) for transaction in transactions]
+    return render_template('orders.html', user=user, transactions=transactions, total=total, title='Orders')

@@ -16,7 +16,7 @@
 {% endblock style %}
 
 {% block content %}
-  {% if current_user.is_admin %}
+  {% if not current_user.is_admin %}
     <!-- Search Bar -->
     {% include 'search.html' with context %}
   {% endif %}
@@ -26,23 +26,39 @@
       <div class="card">
         <h2 class="card-header">{{ category.name }}</h2>
         {% for product in category.products %}
-          <div class="card-body">
-            <a href="{{ url_for('view_product', product_id=product.id) }}">
-              <h2 class="card-title">{{ product.name }}</h2>
-            </a>
-            <p class="card-text"><strong>Price</strong>: &#8377;{{ product.price }}</p>
-            <p class="card-text"><strong>Quantity</strong>: {{ product.quantity }}</p>
-            <p class="card-text">
-              <strong>Man. Date</strong>: {{ product.manufacture_date.strftime('%d/%m/%Y') }}
-              <!-- Create a form for the quantity of the product -->
-              <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}">
-                <input type="number" name="quantity" value="1" min="1" max="{{ product.quantity }}" required>
-                <button type="submit" class="btn btn-primary add">Add to Cart</button>
-              </form>        
-            </p>
-
-          </div>
+          {% if (price and product.price <= price) or (name and name.lower() in product.name.lower()) or not (price or name) %}
+            <div class="card-body">
+              <a href="{{ url_for('view_product', product_id=product.id) }}">
+                <h2 class="card-title">{{ product.name }}</h2>
+              </a>
+              <p class="card-text"><strong>Price</strong>: &#8377;{{ product.price }}</p>
+              <p class="card-text"><strong>Quantity</strong>: {{ product.quantity }}</p>
+              {% if product.quantity %}
+                <p class="card-text">
+                  <strong>Man. Date</strong>: {{ product.manufacture_date.strftime('%d/%m/%Y') }}
+                  <!-- Create a form for the quantity of the product -->
+                  <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}">
+                    <input type="number" name="quantity" value="1" min="1" max="{{ product.quantity }}" required>
+                    <button type="submit" class="btn btn-primary add">Add to Cart</button>
+                  </form>        
+                </p>
+              {% else %}
+                  <h4 class="card-text text-danger">
+                    Out of Stock
+                  </h4>
+              {% endif %}
+            </div>
+          {% endif %}
         {% endfor %}
+      </div>
+    {% else %}
+      <div class="card">
+        <h2 class="card-header">{{ category.name }}</h2>
+        <div class="card-body">
+          <h4>
+            <strong>No products in this category</strong>
+          </h4>
+        </div>
       </div>
     {% endif %}
   {% endfor %}
